@@ -34,162 +34,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Личный кабинет'),
-        backgroundColor: Color(0xFF6200EA),
+        title: const Text('Личный кабинет'),
+        backgroundColor: const Color(0xFF6200EA),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF6200EA), Color(0xFFFF6200)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Consumer<GameState>(
-          builder: (context, state, _) => SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Профиль',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Card(
-                    child: ListTile(
-                      title: Text('Информация'),
-                      subtitle: Text(
-                        'NeoCoins: ${state.neoCoins}\n'
-                        'Серия входов: ${state.loginStreak} дней\n'
-                        'Сыграно игр: ${state.techTapScores.length + state.codeMatchScores.length}',
-                      ),
-                    ),
-                  ),
-                  
-                  SizedBox(height: 16),
-                  Card(
-                    child: ListTile(
-                      title: Text('Бейджи'),
-                      subtitle: Text('Получено ${state.unlockedBadges.length} из ${state.allBadges.length}'),
-                      trailing: ElevatedButton(
-                        onPressed: () => Navigator.pushNamed(context, '/badges'),
-                        child: Text('Посмотреть все'),
-                      ),
-                    ),
-                  ),
-                  
-                  SizedBox(height: 16),
-                  Text(
-                    'Купленные предметы',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  state.getPurchasedItems.isEmpty
-                      ? Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            'Вы пока ничего не купили',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            childAspectRatio: 0.9,
-                          ),
-                          itemCount: state.getPurchasedItems.length,
-                          itemBuilder: (context, index) {
-                            final item = state.getPurchasedItems[index];
-                            return Card(
-                              elevation: 3,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Image.asset(
-                                        _getImagePathForItem(item),
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) => 
-                                          Icon(Icons.shopping_bag, size: 40),
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      item,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                  
-                  SizedBox(height: 16),
-                  Text(
-                    'Последняя активность',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  state.getActivityLog.isEmpty
-                      ? Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            'Нет активности',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                        )
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: state.getActivityLog.length > 10 ? 10 : state.getActivityLog.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              margin: EdgeInsets.symmetric(vertical: 4.0),
-                              child: ListTile(
-                                title: Text(state.getActivityLog[index]),
-                              ),
-                            );
-                          },
-                        ),
-                ],
+      body: Stack(
+        children: [
+          // Градиентный фон на всю высоту экрана
+          Container(
+            height: MediaQuery.of(context).size.height, // Растягиваем на всю высоту
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6200EA), Color(0xFFFF6200)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-        ),
+          // Контент
+          Consumer<GameState>(
+            builder: (context, state, _) => SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Профиль',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      child: ListTile(
+                        title: const Text('Информация'),
+                        subtitle: Text(
+                          'NeoCoins: ${state.neoCoins}\n'
+                          'Серия входов: ${state.loginStreak} дней\n'
+                          'Сыграно игр: ${state.techTapScores.length + state.codeMatchScores.length}',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      child: ListTile(
+                        title: const Text('Бейджи'),
+                        subtitle: Text(
+                            'Получено ${state.unlockedBadges.length} из ${state.allBadges.length}'),
+                        trailing: ElevatedButton(
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/badges'),
+                          child: const Text('Посмотреть все'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Купленные предметы',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    state.getPurchasedItems.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              'Вы пока ничего не купили',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 0.9,
+                            ),
+                            itemCount: state.getPurchasedItems.length,
+                            itemBuilder: (context, index) {
+                              final item = state.getPurchasedItems[index];
+                              return Card(
+                                elevation: 3,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Image.asset(
+                                          _getImagePathForItem(item),
+                                          fit: BoxFit.contain,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(
+                                                      Icons.shopping_bag,
+                                                      size: 40),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Последняя активность',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    state.getActivityLog.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              'Нет активности',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: state.getActivityLog.length > 10
+                                ? 10
+                                : state.getActivityLog.length,
+                            itemBuilder: (context, index) {
+                              return Card(
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
+                                child: ListTile(
+                                  title: Text(state.getActivityLog[index]),
+                                ),
+                              );
+                            },
+                          ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Главная'),
           BottomNavigationBarItem(icon: Icon(Icons.games), label: 'Игры'),
-          BottomNavigationBarItem(icon: Icon(Icons.leaderboard), label: 'Рейтинг'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.leaderboard), label: 'Рейтинг'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFFFF6200),
+        selectedItemColor: const Color(0xFFFF6200),
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         onTap: _onItemTapped,
