@@ -1,6 +1,6 @@
 # Ссылка на Github Actions
 
-https://nousees.github.io/app_neoflex/#/home
+https://nousees.github.io/app_neoflex/
 
 # Классический запуск
 
