@@ -13,6 +13,7 @@ import 'screens/rewards_screen.dart';
 import 'screens/badges_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/quiz_screen.dart';
+  import 'screens/education_screen.dart';
 
 void main() {
   runApp(
@@ -66,6 +67,7 @@ class NeoChallengeApp extends StatelessWidget {
         '/badges': (context) => BadgesScreen(),
         '/history': (context) => HistoryScreen(),
         '/quiz': (context) => QuizScreen(),
+        '/education': (context) => EducationScreen(),
       },
     );
   }

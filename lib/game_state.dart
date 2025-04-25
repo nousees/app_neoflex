@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'badge.dart';
+import 'models/badge.dart';
 
 class GameState with ChangeNotifier {
   static final GameState _instance = GameState._internal();
@@ -29,7 +28,11 @@ class GameState with ChangeNotifier {
   bool hasCompletedQuiz = false;
   int quizProgress = 0;
   bool hasHandledDailyLogin = false;
-  bool _isInitialized = false; // Флаг для предотвращения повторной загрузки
+  bool _isInitialized = false;
+
+  int lessonsCompleted = 0;
+  int miniQuizzesCompleted = 0;
+  List<String> completedLessons = [];
 
   List<Badge> allBadges = [
     Badge(
@@ -132,6 +135,20 @@ class GameState with ChangeNotifier {
       game: 'Quiz',
     ),
     Badge(
+      id: 'education_novice',
+      title: 'Новичок образования',
+      description: 'Пройдите 1 урок в образовательном блоке',
+      icon: 'assets/badges/education_novice.png',
+      game: 'Education',
+    ),
+    Badge(
+      id: 'quiz_master',
+      title: 'Мастер тестов',
+      description: 'Пройдите 3 мини-теста в образовательном блоке',
+      icon: 'assets/badges/quiz_master.png',
+      game: 'Education',
+    ),
+    Badge(
       id: 'achievement_master',
       title: 'Мастер достижений',
       description: 'Соберите все остальные достижения',
@@ -151,7 +168,33 @@ class GameState with ChangeNotifier {
 
   void addCoins(int coins) {
     neoCoins += coins;
-    print('Adding coins: $coins, new total: $neoCoins');
+    _saveState();
+    notifyListeners();
+  }
+
+  void completeLesson(String lessonTitle) {
+    if (!completedLessons.contains(lessonTitle)) {
+      lessonsCompleted++;
+      completedLessons.add(lessonTitle);
+      activityLog.insert(0, 'Пройден урок в образовательном блоке: $lessonTitle');
+      if (lessonsCompleted >= 1) {
+        unlockBadge('education_novice');
+      }
+      _saveState();
+      notifyListeners();
+    }
+  }
+
+  bool isLessonCompleted(String lessonTitle) {
+    return completedLessons.contains(lessonTitle);
+  }
+
+  void completeMiniQuiz() {
+    miniQuizzesCompleted++;
+    activityLog.insert(0, 'Пройден мини-тест в образовательном блоке');
+    if (miniQuizzesCompleted >= 3) {
+      unlockBadge('quiz_master');
+    }
     _saveState();
     notifyListeners();
   }
@@ -199,7 +242,6 @@ class GameState with ChangeNotifier {
 
   Future<void> handleDailyLogin() async {
     if (hasHandledDailyLogin) {
-      print('Daily login already handled for this session');
       return;
     }
 
@@ -207,60 +249,46 @@ class GameState with ChangeNotifier {
     final today = DateTime(now.year, now.month, now.day);
     final prefs = await SharedPreferences.getInstance();
 
-    print('Current date: $today');
-    print('Last login date: $lastLoginDate');
-
     if (lastLoginDate == null) {
-      print('First login: Setting loginStreak to 1');
       loginStreak = 1;
       neoCoins += 10;
       lastLoginDate = today;
       hasHandledDailyLogin = true;
-      print('After first login: loginStreak=$loginStreak, neoCoins=$neoCoins');
-      await _saveState();
-      notifyListeners();
-      return;
-    }
-
-    final lastLoginDay = DateTime(lastLoginDate!.year, lastLoginDate!.month, lastLoginDate!.day);
-    print('Last login day (normalized): $lastLoginDay');
-
-    if (lastLoginDay == today) {
-      print('Same day login, no update to streak');
-      hasHandledDailyLogin = true;
-      return;
-    }
-
-    final yesterday = today.subtract(Duration(days: 1));
-    print('Yesterday: $yesterday');
-
-    if (lastLoginDay == yesterday) {
-      loginStreak++;
-      print('Consecutive login: loginStreak incremented to $loginStreak');
     } else {
-      loginStreak = 1;
-      print('Non-consecutive login: loginStreak reset to 1');
-    }
+      final lastLoginDay = DateTime(lastLoginDate!.year, lastLoginDate!.month, lastLoginDate!.day);
 
-    int reward = 5;
-    if (loginStreak <= 7) {
-      final rewards = [10, 15, 20, 25, 30, 35, 50];
-      reward = rewards[loginStreak - 1];
-    }
-
-    neoCoins += reward;
-    activityLog.insert(0, 'Награда за вход: $reward NeoCoins (день $loginStreak)');
-
-    for (var badge in allBadges) {
-      if (!badge.isUnlocked && badge.requiredDays != null && loginStreak >= badge.requiredDays!) {
-        unlockBadge(badge.id);
+      if (lastLoginDay == today) {
+        hasHandledDailyLogin = true;
+        return;
       }
+
+      final yesterday = today.subtract(Duration(days: 1));
+
+      if (lastLoginDay == yesterday) {
+        loginStreak++;
+      } else {
+        loginStreak = 1;
+      }
+
+      int reward = 5;
+      if (loginStreak <= 7) {
+        final rewards = [10, 15, 20, 25, 30, 35, 50];
+        reward = rewards[loginStreak - 1];
+      }
+
+      neoCoins += reward;
+      activityLog.insert(0, 'Награда за вход: $reward NeoCoins (день $loginStreak)');
+
+      for (var badge in allBadges) {
+        if (!badge.isUnlocked && badge.requiredDays != null && loginStreak >= badge.requiredDays!) {
+          unlockBadge(badge.id);
+        }
+      }
+
+      lastLoginDate = today;
+      hasHandledDailyLogin = true;
     }
 
-    lastLoginDate = today;
-    hasHandledDailyLogin = true;
-    print('Updated lastLoginDate to: $lastLoginDate');
-    print('After login: loginStreak=$loginStreak, neoCoins=$neoCoins');
     await _saveState();
     notifyListeners();
   }
@@ -314,7 +342,6 @@ class GameState with ChangeNotifier {
 
   Future<void> _loadState() async {
     if (_isInitialized) {
-      print('State already initialized, skipping _loadState');
       return;
     }
 
@@ -331,8 +358,9 @@ class GameState with ChangeNotifier {
     maxTechTapCombo = prefs.getInt('maxTechTapCombo') ?? 0;
     hasCompletedQuiz = prefs.getBool('hasCompletedQuiz') ?? false;
     quizProgress = prefs.getInt('quizProgress') ?? 0;
-
-    print('Loaded state: loginStreak=$loginStreak, neoCoins=$neoCoins');
+    lessonsCompleted = prefs.getInt('lessonsCompleted') ?? 0;
+    miniQuizzesCompleted = prefs.getInt('miniQuizzesCompleted') ?? 0;
+    completedLessons = prefs.getStringList('completedLessons') ?? [];
 
     final unlockedBadgeIds = prefs.getStringList('unlockedBadges') ?? [];
     allBadges = allBadges.map((badge) {
@@ -343,13 +371,9 @@ class GameState with ChangeNotifier {
     if (lastLogin != null) {
       try {
         lastLoginDate = DateTime.parse(lastLogin);
-        print('Loaded lastLoginDate: $lastLoginDate');
       } catch (e) {
-        print('Error parsing lastLoginDate: $e');
         lastLoginDate = null;
       }
-    } else {
-      print('No lastLoginDate found in SharedPreferences');
     }
     notifyListeners();
   }
@@ -368,12 +392,13 @@ class GameState with ChangeNotifier {
     await prefs.setInt('maxTechTapCombo', maxTechTapCombo);
     await prefs.setBool('hasCompletedQuiz', hasCompletedQuiz);
     await prefs.setInt('quizProgress', quizProgress);
+    await prefs.setInt('lessonsCompleted', lessonsCompleted);
+    await prefs.setInt('miniQuizzesCompleted', miniQuizzesCompleted);
+    await prefs.setStringList('completedLessons', completedLessons);
     await prefs.setStringList('unlockedBadges',
-      allBadges.where((b) => b.isUnlocked).map((b) => b.id).toList());
+        allBadges.where((b) => b.isUnlocked).map((b) => b.id).toList());
     if (lastLoginDate != null) {
       await prefs.setString('lastLoginDate', lastLoginDate!.toIso8601String());
-      print('Saved lastLoginDate: ${lastLoginDate!.toIso8601String()}');
     }
-    print('State saved: loginStreak=$loginStreak, neoCoins=$neoCoins');
   }
 }

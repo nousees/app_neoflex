@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../game_state.dart';
-import '../badge.dart';
+import '../models/badge.dart';
 
 class BadgesScreen extends StatelessWidget {
   @override

@@ -127,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       subtitle: Text('NeoCoins: ${state.neoCoins} | Серия входов: ${state.loginStreak}'),
                     ),
                   ),
-                  
                   SizedBox(height: 16),
                   Text(
                     'Доступные опции',
@@ -170,6 +169,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       trailing: ElevatedButton(
                         onPressed: () => _navigateToQuiz(context),
                         child: Text(state.hasCompletedQuiz ? 'Пройти снова' : 'Пройти'),
+                      ),
+                    ),
+                  ),
+                  Card(
+                    child: ListTile(
+                      title: Text('Образовательный блок'),
+                      trailing: ElevatedButton(
+                        onPressed: () => Navigator.pushNamed(context, '/education'),
+                        child: Text('Изучить'),
                       ),
                     ),
                   ),

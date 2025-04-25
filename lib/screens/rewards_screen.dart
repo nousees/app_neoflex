@@ -11,7 +11,6 @@ class _RewardsScreenState extends State<RewardsScreen> {
   @override
   void initState() {
     super.initState();
-    // Вызываем handleDailyLogin при открытии экрана
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final gameState = Provider.of<GameState>(context, listen: false);
       await gameState.handleDailyLogin();
