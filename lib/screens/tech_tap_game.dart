@@ -21,8 +21,7 @@ class _TechTapGameState extends State<TechTapGame> {
   bool isPerfectGame = true;
   int _selectedIndex = 1;
   final double iconSize = 50.0;
-  final double minY = 80.0;
-  double bottomPadding = 80.0;
+  final double bottomPadding = 20.0;
 
   @override
   void initState() {
@@ -40,8 +39,8 @@ class _TechTapGameState extends State<TechTapGame> {
       missedIcons = 0;
       isPerfectGame = true;
     });
-    
-    timer = Timer.periodic(Duration(seconds: 1), (t) {
+
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
       setState(() {
         timeLeft--;
@@ -62,15 +61,16 @@ class _TechTapGameState extends State<TechTapGame> {
         currentCombo = 0;
       });
     }
-    
-    final random = Random();
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
 
-    final double maxX = screenWidth - iconSize;
-    final double maxY = screenHeight - iconSize - bottomPadding;
+    final random = Random();
+    final screenSize = MediaQuery.of(context).size;
+    final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
+    final bottomNavHeight = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom;
+
+    final double maxX = screenSize.width - iconSize;
+    final double maxY = screenSize.height - appBarHeight - bottomNavHeight - iconSize - bottomPadding;
     final double x = random.nextDouble() * maxX;
-    final double y = minY + random.nextDouble() * (maxY - minY);
+    final double y = appBarHeight + (random.nextDouble() * maxY);
 
     final icon = {
       'x': x,
@@ -78,14 +78,14 @@ class _TechTapGameState extends State<TechTapGame> {
       'type': ['AI', 'Cloud', 'Blockchain'][random.nextInt(3)],
       'value': random.nextInt(5) + 1,
     };
-    
+
     if (!mounted) return;
     setState(() {
       icons.add(icon);
       if (icons.length > 10) icons.removeAt(0);
     });
-    
-    final iconTimer = Timer(Duration(seconds: 2), () {
+
+    final iconTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => icons.remove(icon));
     });
@@ -94,18 +94,21 @@ class _TechTapGameState extends State<TechTapGame> {
 
   void tapIcon(Map<String, dynamic> icon) {
     if (!isGameActive) return;
-    
+
     setState(() {
       score += icon['value'] as int;
       icons.remove(icon);
       currentCombo++;
-      
-      if (currentCombo > Provider.of<GameState>(context, listen: false).maxTechTapCombo) {
-        Provider.of<GameState>(context, listen: false).maxTechTapCombo = currentCombo;
+
+      if (currentCombo >
+          Provider.of<GameState>(context, listen: false).maxTechTapCombo) {
+        Provider.of<GameState>(context, listen: false).maxTechTapCombo =
+            currentCombo;
       }
-      
+
       if (currentCombo >= 10) {
-        Provider.of<GameState>(context, listen: false).unlockBadge('combo_master');
+        Provider.of<GameState>(context, listen: false)
+            .unlockBadge('combo_master');
       }
     });
   }
@@ -114,39 +117,39 @@ class _TechTapGameState extends State<TechTapGame> {
     timer?.cancel();
     iconTimers.forEach((t) => t.cancel());
     iconTimers.clear();
-    
+
     final gameState = Provider.of<GameState>(context, listen: false);
-    
+
     if (isPerfectGame && missedIcons == 0) {
       gameState.techTapPerfectGames++;
       if (gameState.techTapPerfectGames >= 5) {
         gameState.unlockBadge('perfect_tapper');
       }
     }
-    
+
     if (score >= 50) gameState.unlockBadge('tech_master');
     if (score >= 100) gameState.unlockBadge('speedster');
-    
+
     gameState.addCoins(score);
     gameState.addGameScore('Tech Tap', score);
-    
+
     setState(() => isGameActive = false);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Игра окончена!'),
+        title: const Text('Игра окончена!'),
         content: Text('Вы заработали $score NeoCoins'),
         actions: [
           TextButton(
-            child: Text('Играть снова'),
+            child: const Text('Играть снова'),
             onPressed: () {
               Navigator.pop(context);
               startGame();
             },
           ),
           TextButton(
-            child: Text('В меню'),
+            child: const Text('В меню'),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -187,12 +190,12 @@ class _TechTapGameState extends State<TechTapGame> {
       final shouldExit = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Выйти из игры?'),
-          content: Text('Ваш прогресс будет сохранён.'),
+          title: const Text('Выйти из игры?'),
+          content: const Text('Ваш прогресс будет сохранён.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Нет', style: TextStyle(color: Colors.grey)),
+              child: const Text('Нет', style: TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
@@ -200,10 +203,12 @@ class _TechTapGameState extends State<TechTapGame> {
                 iconTimers.forEach((t) => t.cancel());
                 iconTimers.clear();
                 Provider.of<GameState>(context, listen: false).addCoins(score);
-                Provider.of<GameState>(context, listen: false).addGameScore('Tech Tap', score);
+                Provider.of<GameState>(context, listen: false)
+                    .addGameScore('Tech Tap', score);
                 Navigator.pop(context, true);
               },
-              child: Text('Да', style: TextStyle(color: Color(0xFFFF6200))),
+              child: const Text('Да',
+                  style: TextStyle(color: Color(0xFFFF6200))),
             ),
           ],
         ),
@@ -218,13 +223,16 @@ class _TechTapGameState extends State<TechTapGame> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('Tech Tap'),
-          backgroundColor: Color(0xFF6200EA),
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          title: const Text('Tech Tap'),
+          backgroundColor: const Color(0xFF6200EA),
+          titleTextStyle: const TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         body: Container(
-          decoration: BoxDecoration(
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF6200EA), Color(0xFFFF6200)],
               begin: Alignment.topLeft,
@@ -233,20 +241,22 @@ class _TechTapGameState extends State<TechTapGame> {
           ),
           child: Stack(
             children: [
-              Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Осталось времени: $timeLeft сек | Очки: $score',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Осталось времени: $timeLeft сек | Очки: $score',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ],
+                ),
               ),
               ...icons.map((icon) => Positioned(
                     left: icon['x'],
@@ -256,7 +266,7 @@ class _TechTapGameState extends State<TechTapGame> {
                       child: Container(
                         width: iconSize,
                         height: iconSize,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Color(0xFFFF6200),
                           shape: BoxShape.circle,
                           boxShadow: [
@@ -276,7 +286,8 @@ class _TechTapGameState extends State<TechTapGame> {
                             errorBuilder: (context, error, stackTrace) {
                               return Text(
                                 icon['type'],
-                                style: TextStyle(color: Colors.white, fontSize: 12),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12),
                               );
                             },
                           ),
@@ -288,14 +299,15 @@ class _TechTapGameState extends State<TechTapGame> {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: [
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Главная'),
             BottomNavigationBarItem(icon: Icon(Icons.games), label: 'Игры'),
-            BottomNavigationBarItem(icon: Icon(Icons.leaderboard), label: 'Рейтинг'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.leaderboard), label: 'Рейтинг'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xFFFF6200),
+          selectedItemColor: const Color(0xFFFF6200),
           unselectedItemColor: Colors.grey,
           backgroundColor: Colors.white,
           onTap: _onItemTapped,

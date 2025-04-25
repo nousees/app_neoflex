@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"main.dart.js": "12d95d2219611e7c978db11c6bde4c72",
+const RESOURCES = {"main.dart.js": "b513054899cf26b41dfcf5fbada7b795",
 "index.html": "2e57178282fb75e63c968ad53ab4ae1f",
 "/": "2e57178282fb75e63c968ad53ab4ae1f",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
@@ -30,7 +30,7 @@ const RESOURCES = {"main.dart.js": "12d95d2219611e7c978db11c6bde4c72",
 "assets/assets/badges/veteran.png": "55af64dff5071d85168c6ffdf491aab0",
 "assets/assets/badges/combo_master.png": "6f596a51214f14dd286a383ac6cc8453",
 "assets/assets/cloud.png": "9194e3f0a74e64266cb3f5050b49ec66",
-"assets/assets/blockchain.png": "1ac64839fd8b33098175ef341ee7bea7",
+"assets/assets/blockchain.png": "4fe4e33c92512684085d19af1f8acb8c",
 "assets/assets/water_bottle.jpg": "dab3ed9429d7638291605478a7a333f1",
 "assets/assets/portable_speaker.jpg": "076a5a476522c3bf9cb13e7b2a86d5b1",
 "assets/assets/notebook_set2.jpg": "4eb1d805aae382f38cfe4860cba8d4fa",
@@ -58,7 +58,7 @@ const RESOURCES = {"main.dart.js": "12d95d2219611e7c978db11c6bde4c72",
 "canvaskit/skwasm_st.wasm": "56c3973560dfcbf28ce47cebe40f3206",
 "flutter.js": "76f08d47ff9f5715220992f993002504",
 "version.json": "d20caf3174a26ae63ba4b9fe94bab789",
-"flutter_bootstrap.js": "45682b056df65b0ba2829ec24830ae18",
+"flutter_bootstrap.js": "1df377d81f64d4474e9b039002492eb9",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796"};
 // The application shell files that are downloaded before a service worker can
 // start.
