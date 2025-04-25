@@ -1,0 +1,37 @@
+name: app_neoflex
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.0
+  shared_preferences: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/badges/
+    # - assets/badges/collector.png
+    # - assets/badges/combo_master.png
+    # - assets/badges/flawless.png
+    # - assets/badges/genius.png
+    # - assets/badges/loyal.png
+    # - assets/badges/memory_legend.png
+    # - assets/badges/memory.png
+    # - assets/badges/pair.png
+    # - assets/badges/perfect_tapper.png
+    # - assets/badges/speedster.png
+    # - assets/badges/tech.png
+    # - assets/badges/veteran.png
+    # - assets/badges/week.png
