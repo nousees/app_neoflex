@@ -4,13 +4,13 @@ import '../game_state.dart';
 
 class ShopScreen extends StatelessWidget {
   final List<Map<String, dynamic>> items = [
-    {'name': 'Powerbank', 'cost': 500, 'imagePath': 'assets/powerbank.jpg'},
-    {'name': 'Термокружка', 'cost': 300, 'imagePath': 'assets/thermo_mug.jpg'},
-    {'name': 'Бутылка', 'cost': 250, 'imagePath': 'assets/water_bottle.jpg'},
-    {'name': 'Портативная колонка', 'cost': 400, 'imagePath': 'assets/portable_speaker.jpg'},
-    {'name': 'Музыкальная станция', 'cost': 800, 'imagePath': 'assets/music_station.jpg'},
-    {'name': 'Блокнот и ручка (набор 1)', 'cost': 200, 'imagePath': 'assets/notebook_set1.jpg'},
-    {'name': 'Блокнот и ручка (набор 2)', 'cost': 220, 'imagePath': 'assets/notebook_set2.jpg'},
+    {'name': 'Powerbank', 'cost': 5000, 'imagePath': 'assets/powerbank.jpg'},
+    {'name': 'Термокружка', 'cost': 2500, 'imagePath': 'assets/thermo_mug.jpg'},
+    {'name': 'Бутылка', 'cost': 2000, 'imagePath': 'assets/water_bottle.jpg'},
+    {'name': 'Портативная колонка', 'cost': 4000, 'imagePath': 'assets/portable_speaker.jpg'},
+    {'name': 'Музыкальная станция', 'cost': 8000, 'imagePath': 'assets/music_station.jpg'},
+    {'name': 'Блокнот и ручка (набор 1)', 'cost': 1500, 'imagePath': 'assets/notebook_set1.jpg'},
+    {'name': 'Блокнот и ручка (набор 2)', 'cost': 1500, 'imagePath': 'assets/notebook_set2.jpg'},
   ];
 
   @override
