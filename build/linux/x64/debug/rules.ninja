@@ -42,7 +42,7 @@ rule CXX_EXECUTABLE_LINKER__app_neoflex
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /snap/flutter/149/usr/bin/cmake -S/home/nouses/app_neoflex/linux -B/home/nouses/app_neoflex/build/linux/x64/debug
+  command = /snap/flutter/149/usr/bin/cmake -S/home/nouses/last_neoflex/app_neoflex/linux -B/home/nouses/last_neoflex/app_neoflex/build/linux/x64/debug
   description = Re-running CMake...
   generator = 1
 

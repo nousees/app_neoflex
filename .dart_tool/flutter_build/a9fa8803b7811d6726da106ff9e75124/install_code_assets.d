@@ -1,0 +1,1 @@
+ /home/nouses/last_neoflex/app_neoflex/.dart_tool/flutter_build/a9fa8803b7811d6726da106ff9e75124/native_assets.json: 

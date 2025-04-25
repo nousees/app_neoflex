@@ -1,8 +1,8 @@
-# Install script for directory: /home/nouses/app_neoflex/linux/runner
+# Install script for directory: /home/nouses/last_neoflex/app_neoflex/linux/runner
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/nouses/app_neoflex/build/linux/x64/debug/bundle")
+  set(CMAKE_INSTALL_PREFIX "/home/nouses/last_neoflex/app_neoflex/build/linux/x64/debug/bundle")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
