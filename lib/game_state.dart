@@ -340,6 +340,8 @@ class GameState with ChangeNotifier {
     }
   }
 
+  
+
   Future<void> _loadState() async {
     if (_isInitialized) {
       return;

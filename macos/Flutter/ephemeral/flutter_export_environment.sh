@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/home/nouses/snap/flutter/common/flutter"
-export "FLUTTER_APPLICATION_PATH=/home/nouses/app_neoflex"
+export "FLUTTER_APPLICATION_PATH=/home/nouses/last_neoflex/app_neoflex"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"
