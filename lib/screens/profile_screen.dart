@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../game_state.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -9,6 +10,49 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedIndex = 3;
+  String? firstName;
+  String? lastName;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      final dataList = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .limit(1);
+      if (dataList != null && dataList.isNotEmpty) {
+        final data = dataList[0];
+        setState(() {
+          firstName = data['first_name'] ?? '';
+          lastName = data['last_name'] ?? '';
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          firstName = '';
+          lastName = '';
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    await Supabase.instance.client.auth.signOut();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,11 +76,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading)
+      return Center(child: CircularProgressIndicator());
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Личный кабинет'),
         backgroundColor: const Color(0xFF6200EA),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            tooltip: 'Выйти',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -54,13 +108,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Профиль',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Профиль',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.edit, color: Colors.white),
+                        tooltip: 'Редактировать',
+                        onPressed: () async {
+                          final result = await showDialog<Map<String, String>>(
+                            context: context,
+                            builder: (context) {
+                              final _nameController = TextEditingController(text: firstName ?? '');
+                              final _surnameController = TextEditingController(text: lastName ?? '');
+                              return AlertDialog(
+                                title: Text('Редактировать профиль'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: _nameController,
+                                      decoration: InputDecoration(labelText: 'Имя'),
+                                    ),
+                                    TextField(
+                                      controller: _surnameController,
+                                      decoration: InputDecoration(labelText: 'Фамилия'),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Отмена'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, {
+                                        'first_name': _nameController.text,
+                                        'last_name': _surnameController.text,
+                                      });
+                                    },
+                                    child: Text('Сохранить'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (result != null) {
+                            setState(() { isLoading = true; });
+                            final user = Supabase.instance.client.auth.currentUser;
+                            await Supabase.instance.client
+                                .from('profiles')
+                                .update({
+                                  'first_name': result['first_name'],
+                                  'last_name': result['last_name'],
+                                })
+                                .eq('id', user!.id);
+                            setState(() {
+                              firstName = result['first_name'];
+                              lastName = result['last_name'];
+                              isLoading = false;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Имя: ${firstName ?? '-'}\nФамилия: ${lastName ?? '-'}',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                   const SizedBox(height: 16),
                   Card(

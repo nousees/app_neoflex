@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/badge.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GameState with ChangeNotifier {
   static final GameState _instance = GameState._internal();
@@ -199,13 +200,16 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void unlockBadge(String id) {
+  void unlockBadge(String id) async {
+    final user = Supabase.instance.client.auth.currentUser;
     final badgeIndex = allBadges.indexWhere((b) => b.id == id);
-    if (badgeIndex != -1 && !allBadges[badgeIndex].isUnlocked) {
+    if (badgeIndex != -1 && !allBadges[badgeIndex].isUnlocked && user != null) {
       allBadges[badgeIndex] = allBadges[badgeIndex].copyWith(isUnlocked: true);
       activityLog.insert(0, 'Получен бейдж: ${allBadges[badgeIndex].title}');
       _checkAchievementMaster();
-      _saveState();
+      await Supabase.instance.client
+          .from('user_badges')
+          .insert({'user_id': user.id, 'badge_id': id});
       notifyListeners();
     }
   }
@@ -229,13 +233,20 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void purchaseItem(String item, int cost) {
-    if (neoCoins >= cost && !purchasedItems.contains(item)) {
+  void purchaseItem(String item, int cost) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (neoCoins >= cost && !purchasedItems.contains(item) && user != null) {
       neoCoins -= cost;
       purchasedItems.add(item);
       activityLog.insert(0, 'Куплен предмет: $item за $cost NeoCoins');
       checkCollectorBadge();
-      _saveState();
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'neo_coins': neoCoins})
+          .eq('id', user.id);
+      await Supabase.instance.client
+          .from('user_purchases')
+          .insert({'user_id': user.id, 'item_name': item});
       notifyListeners();
     }
   }
@@ -247,7 +258,7 @@ class GameState with ChangeNotifier {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final prefs = await SharedPreferences.getInstance();
+    final user = Supabase.instance.client.auth.currentUser;
 
     if (lastLoginDate == null) {
       loginStreak = 1;
@@ -340,67 +351,51 @@ class GameState with ChangeNotifier {
     }
   }
 
-  
-
   Future<void> _loadState() async {
-    if (_isInitialized) {
-      return;
-    }
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final profile = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .single();
+    neoCoins = profile['neo_coins'] ?? 0;
+    loginStreak = profile['login_streak'] ?? 0;
+    lastLoginDate = profile['last_login_date'] != null
+        ? DateTime.parse(profile['last_login_date'])
+        : null;
 
-    final prefs = await SharedPreferences.getInstance();
-    neoCoins = prefs.getInt('neoCoins') ?? 0;
-    purchasedItems = prefs.getStringList('purchasedItems') ?? [];
-    loginStreak = prefs.getInt('loginStreak') ?? 0;
-    activityLog = prefs.getStringList('activityLog') ?? [];
-    techTapScores = (prefs.getStringList('techTapScores') ?? []).map(int.parse).toList();
-    codeMatchScores = (prefs.getStringList('codeMatchScores') ?? []).map(int.parse).toList();
-    gamesPlayed = prefs.getInt('gamesPlayed') ?? 0;
-    perfectCodeMatchRuns = prefs.getInt('perfectCodeMatchRuns') ?? 0;
-    techTapPerfectGames = prefs.getInt('techTapPerfectGames') ?? 0;
-    maxTechTapCombo = prefs.getInt('maxTechTapCombo') ?? 0;
-    hasCompletedQuiz = prefs.getBool('hasCompletedQuiz') ?? false;
-    quizProgress = prefs.getInt('quizProgress') ?? 0;
-    lessonsCompleted = prefs.getInt('lessonsCompleted') ?? 0;
-    miniQuizzesCompleted = prefs.getInt('miniQuizzesCompleted') ?? 0;
-    completedLessons = prefs.getStringList('completedLessons') ?? [];
+    // Загрузка покупок
+    final purchases = await Supabase.instance.client
+        .from('user_purchases')
+        .select('item_name')
+        .eq('user_id', user.id);
+    purchasedItems = purchases.map<String>((e) => e['item_name'] as String).toList();
 
-    final unlockedBadgeIds = prefs.getStringList('unlockedBadges') ?? [];
+    // Загрузка бейджей
+    final badges = await Supabase.instance.client
+        .from('user_badges')
+        .select('badge_id')
+        .eq('user_id', user.id);
+    final unlockedBadgeIds = badges.map<String>((e) => e['badge_id'] as String).toList();
     allBadges = allBadges.map((badge) {
       return badge.copyWith(isUnlocked: unlockedBadgeIds.contains(badge.id));
     }).toList();
 
-    final lastLogin = prefs.getString('lastLoginDate');
-    if (lastLogin != null) {
-      try {
-        lastLoginDate = DateTime.parse(lastLogin);
-      } catch (e) {
-        lastLoginDate = null;
-      }
-    }
     notifyListeners();
   }
 
   Future<void> _saveState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('neoCoins', neoCoins);
-    await prefs.setStringList('purchasedItems', purchasedItems);
-    await prefs.setInt('loginStreak', loginStreak);
-    await prefs.setStringList('activityLog', activityLog.take(20).toList());
-    await prefs.setStringList('techTapScores', techTapScores.map((s) => s.toString()).toList());
-    await prefs.setStringList('codeMatchScores', codeMatchScores.map((s) => s.toString()).toList());
-    await prefs.setInt('gamesPlayed', gamesPlayed);
-    await prefs.setInt('perfectCodeMatchRuns', perfectCodeMatchRuns);
-    await prefs.setInt('techTapPerfectGames', techTapPerfectGames);
-    await prefs.setInt('maxTechTapCombo', maxTechTapCombo);
-    await prefs.setBool('hasCompletedQuiz', hasCompletedQuiz);
-    await prefs.setInt('quizProgress', quizProgress);
-    await prefs.setInt('lessonsCompleted', lessonsCompleted);
-    await prefs.setInt('miniQuizzesCompleted', miniQuizzesCompleted);
-    await prefs.setStringList('completedLessons', completedLessons);
-    await prefs.setStringList('unlockedBadges',
-        allBadges.where((b) => b.isUnlocked).map((b) => b.id).toList());
-    if (lastLoginDate != null) {
-      await prefs.setString('lastLoginDate', lastLoginDate!.toIso8601String());
-    }
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    await Supabase.instance.client
+        .from('profiles')
+        .update({
+          'neo_coins': neoCoins,
+          'login_streak': loginStreak,
+          'last_login_date': lastLoginDate?.toIso8601String(),
+        })
+        .eq('id', user.id);
+    // Покупки и бейджи сохраняются сразу при изменении, отдельного сохранения не требуют
   }
 }

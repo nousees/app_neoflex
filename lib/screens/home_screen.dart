@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Consumer<GameState>(
           builder: (context, state, _) {
-            if (_showRewardNotification && state.loginStreak > 0) {
+            if (_showRewardNotification && state.hasHandledDailyLogin) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 final rewards = [10, 15, 20, 25, 30, 35, 50];
                 int reward;

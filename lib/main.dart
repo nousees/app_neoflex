@@ -13,9 +13,17 @@ import 'screens/rewards_screen.dart';
 import 'screens/badges_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/quiz_screen.dart';
-  import 'screens/education_screen.dart';
+import 'screens/education_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: 'https://xtiflgnizphsoyfyxqtd.supabase.co/', // Project URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0aWZsZ25penBoc295Znl4cXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNjc2NjcsImV4cCI6MjA2Mzk0MzY2N30.CDO0IC6HV_ygDEkDZiQUbLvqpniozQ519XKDpq9uoWc', // Anon public key
+  );
   runApp(
     ChangeNotifierProvider(
       create: (_) => GameState(),
@@ -68,6 +76,8 @@ class NeoChallengeApp extends StatelessWidget {
         '/history': (context) => HistoryScreen(),
         '/quiz': (context) => QuizScreen(),
         '/education': (context) => EducationScreen(),
+        '/login': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
       },
     );
   }
